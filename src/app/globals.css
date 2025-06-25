@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.glitch-text {
+  position: relative;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.glitch-text::before {
+  top: -1px;
+  color: white;
+  animation: glitchTop 1s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+  top: 1px;
+  color: gray;
+  animation: glitchBottom 1s infinite linear alternate-reverse;
+}
+@keyframes glitchTop {
+  0% {
+    clip-path: inset(0 0 80% 0);
+    transform: translate(1px, -1px);
+  }
+  100% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(-1px, 1px);
+  }
+}
+@keyframes glitchBottom {
+  0% {
+    clip-path: inset(60% 0 20% 0);
+    transform: translate(-1px, 1px);
+  }
+  100% {
+    clip-path: inset(10% 0 60% 0);
+    transform: translate(1px, -1px);
+  }
+}
