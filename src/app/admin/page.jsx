@@ -1,25 +1,39 @@
-import { connectToDB } from '@/lib/db';
-import Contact from '@/models/Contact';
-import Booking from '@/models/Booking';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { connectToDB } from "@/lib/db";
+import Contact from "@/models/Contact";
+import Booking from "@/models/Booking";
+
+export const dynamic = "force-dynamic"; // required for server-rendering on Vercel
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.email !== 'admin@medizone.com') {
-    redirect('/admin/login');
+  // ✅ Restrict access to only admin
+  if (!session || session.user.email !== "admin@medizone.com") {
+    return (
+      <div className="text-white bg-black min-h-screen flex items-center justify-center">
+        <h1 className="text-2xl">Access Denied. Admins only.</h1>
+      </div>
+    );
   }
 
-  await connectToDB();
-  const contacts = await Contact.find().sort({ createdAt: -1 });
-  const bookings = await Booking.find().sort({ createdAt: -1 });
+  let contacts = [];
+  let bookings = [];
+
+  try {
+    await connectToDB();
+    contacts = await Contact.find().sort({ createdAt: -1 });
+    bookings = await Booking.find().sort({ createdAt: -1 });
+  } catch (error) {
+    console.error("❌ Failed to load admin data:", error);
+  }
 
   return (
     <main className="p-10 text-white bg-black min-h-screen">
       <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
 
+      {/* Contacts Section */}
       <section className="mb-16">
         <h2 className="text-2xl font-semibold mb-4">Contact Submissions</h2>
         <div className="bg-gray-900 rounded-xl p-6 space-y-4">
@@ -34,6 +48,7 @@ export default async function AdminPage() {
         </div>
       </section>
 
+      {/* Bookings Section */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Appointment Bookings</h2>
         <div className="bg-gray-900 rounded-xl p-6 space-y-4">
