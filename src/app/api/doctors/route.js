@@ -1,11 +1,17 @@
-import { connectDB } from '@/lib/mongodb';
-import { NextResponse } from 'next/server';
+import { connectToDB } from '@/lib/db';
+import Doctor from '@/models/Doctor';
 
 export async function POST(req) {
-  const { name, specialization, message } = await req.json();
-  const db = await connectDB();
-  const collection = db.collection('doctor_messages');
+  try {
+    await connectToDB();
+    const body = await req.json();
 
-  await collection.insertOne({ name, specialization, message, createdAt: new Date() });
-  return NextResponse.json({ message: 'Doctor request submitted' });
+    const newDoctor = new Doctor(body);
+    await newDoctor.save();
+
+    return new Response(JSON.stringify(newDoctor), { status: 201 });
+  } catch (error) {
+    console.error('Doctor POST error:', error);
+    return new Response(JSON.stringify({ error: 'Server Error' }), { status: 500 });
+  }
 }
