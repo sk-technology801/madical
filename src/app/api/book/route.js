@@ -1,6 +1,7 @@
 // route.js for /api/book
 import { NextResponse } from 'next/server';
-import { connectToDB } from '@/lib/db';
+import { connectToDB } from '@/lib/mongodb';
+
 import Booking from '@/models/Booking';
 
 export async function POST(req) {

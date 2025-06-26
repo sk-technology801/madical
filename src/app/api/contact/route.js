@@ -1,5 +1,6 @@
 // src/app/api/contact/route.js
-import { connectToDB } from '@/lib/db';
+import { connectToDB } from '@/lib/mongodb';
+
 import Contact from '@/models/Contact';
 import { NextResponse } from 'next/server';
 
