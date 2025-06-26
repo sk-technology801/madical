@@ -1,41 +1,46 @@
 'use client';
-
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function AdminLoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Logging in with: ${email} / ${password}`);
-    // You can use NextAuth or your own API here
+
+    const res = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
+    });
+
+    if (res.ok) {
+      router.push('/admin'); // ✅ Redirect to dashboard after login
+    } else {
+      alert('❌ Invalid credentials');
+    }
   };
 
   return (
-    <main className="flex justify-center items-center min-h-screen bg-black text-white px-6">
-      <form onSubmit={handleLogin} className="bg-gray-900 p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">Admin Login</h1>
-
+    <main className="min-h-screen flex justify-center items-center bg-black text-white">
+      <form onSubmit={handleSubmit} className="bg-gray-900 p-8 rounded-lg w-[350px]">
+        <h1 className="text-2xl mb-6 font-bold">Admin Login</h1>
         <input
           type="email"
-          placeholder="Admin Email"
-          value={email}
+          placeholder="Email"
+          className="w-full mb-4 p-2 bg-gray-800 rounded"
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full bg-gray-800 text-white px-4 py-3 mb-4 rounded-lg outline-none"
         />
         <input
           type="password"
-          placeholder="Admin Password"
-          value={password}
+          placeholder="Password"
+          className="w-full mb-6 p-2 bg-gray-800 rounded"
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full bg-gray-800 text-white px-4 py-3 mb-6 rounded-lg outline-none"
         />
-
-        <button
-          type="submit"
-          className="w-full bg-cyan-400 hover:bg-cyan-500 text-black font-bold py-3 rounded-lg uppercase"
-        >
+        <button type="submit" className="bg-red-600 hover:bg-red-700 w-full py-2 rounded">
           Login
         </button>
       </form>
