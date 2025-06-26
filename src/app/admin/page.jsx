@@ -2,18 +2,16 @@ import { connectToDB } from '@/lib/db';
 import Contact from '@/models/Contact';
 import Booking from '@/models/Booking';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
-  // ✅ Only allow admin
   if (!session || session.user.email !== 'admin@medizone.com') {
     redirect('/admin/login');
   }
 
-  // ✅ Connect to DB and fetch data
   await connectToDB();
   const contacts = await Contact.find().sort({ createdAt: -1 });
   const bookings = await Booking.find().sort({ createdAt: -1 });
@@ -22,7 +20,6 @@ export default async function AdminPage() {
     <main className="p-10 text-white bg-black min-h-screen">
       <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
 
-      {/* Contacts */}
       <section className="mb-16">
         <h2 className="text-2xl font-semibold mb-4">Contact Submissions</h2>
         <div className="bg-gray-900 rounded-xl p-6 space-y-4">
@@ -37,7 +34,6 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      {/* Bookings */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Appointment Bookings</h2>
         <div className="bg-gray-900 rounded-xl p-6 space-y-4">
