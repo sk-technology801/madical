@@ -1,40 +1,47 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { connectDB } from '@/lib/db';
-
-
+import { connectToDB } from '@/lib/db';
+import Contact from '@/models/Contact';
+import Booking from '@/models/Booking';
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || session.user.email !== process.env.ADMIN_EMAIL) {
-    return <div className="text-red-500 text-center mt-10">Access Denied</div>;
-  }
-
-  const db = await connectDB();
-  const contacts = await db.collection('contacts').find().toArray();
-  const appointments = await db.collection('appointments').find().toArray();
+  await connectToDB();
+  const contacts = await Contact.find().sort({ createdAt: -1 });
+  const bookings = await Booking.find().sort({ createdAt: -1 });
 
   return (
-    <main className="min-h-screen bg-black text-white p-10">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    <main className="p-10 text-white bg-black min-h-screen">
+      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
 
-      <section className="mb-10">
-        <h2 className="text-2xl mb-2">Contact Messages</h2>
-        <ul className="bg-gray-900 p-4 rounded space-y-2">
+      {/* Contacts */}
+      <section className="mb-16">
+        <h2 className="text-2xl font-semibold mb-4">Contact Submissions</h2>
+        <div className="bg-gray-900 rounded-xl p-6 space-y-4">
           {contacts.map((c) => (
-            <li key={c._id}>{c.name} — {c.email}</li>
+            <div key={c._id} className="p-4 border border-gray-700 rounded-md">
+              <p><strong>Name:</strong> {c.name}</p>
+              <p><strong>Email:</strong> {c.email}</p>
+              <p><strong>Message:</strong> {c.message}</p>
+              <p className="text-sm text-gray-400">{new Date(c.createdAt).toLocaleString()}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
+      {/* Bookings */}
       <section>
-        <h2 className="text-2xl mb-2">Appointments</h2>
-        <ul className="bg-gray-900 p-4 rounded space-y-2">
-          {appointments.map((a) => (
-            <li key={a._id}>{a.name} — {a.date}</li>
+        <h2 className="text-2xl font-semibold mb-4">Appointment Bookings</h2>
+        <div className="bg-gray-900 rounded-xl p-6 space-y-4">
+          {bookings.map((b) => (
+            <div key={b._id} className="p-4 border border-gray-700 rounded-md">
+              <p><strong>Name:</strong> {b.name}</p>
+              <p><strong>Email:</strong> {b.email}</p>
+              <p><strong>Phone:</strong> {b.phone}</p>
+              <p><strong>Date:</strong> {b.date}</p>
+              <p><strong>Department:</strong> {b.department}</p>
+              <p><strong>Message:</strong> {b.message}</p>
+              <p className="text-sm text-gray-400">{new Date(b.createdAt).toLocaleString()}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
     </main>
   );

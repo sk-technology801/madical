@@ -1,26 +1,19 @@
+// route.js for /api/book
 import { NextResponse } from 'next/server';
-import clientPromise from '@/lib/db';
+import { connectToDB } from '@/lib/db';
+import Booking from '@/models/Booking';
 
 export async function POST(req) {
   try {
+    await connectToDB(); // Connect with mongoose
+
     const body = await req.json();
-    const client = await clientPromise;
-    const db = client.db('medizone'); // your DB name
-    const bookings = db.collection('bookings');
+    const newBooking = new Booking(body);
+    await newBooking.save();
 
-    await bookings.insertOne({
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
-      date: body.date,
-      department: body.department,
-      message: body.message,
-      createdAt: new Date(),
-    });
-
-    return NextResponse.json({ success: true, message: 'Booking confirmed!' });
+    return NextResponse.json({ success: true, message: 'Booking saved' });
   } catch (error) {
-    console.error('Booking API error:', error);
-    return NextResponse.json({ success: false, error: 'Failed to book appointment' }, { status: 500 });
+    console.error('Booking API Error:', error);
+    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
   }
 }
