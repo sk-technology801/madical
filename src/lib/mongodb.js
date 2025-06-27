@@ -1,48 +1,27 @@
-// import { MongoClient } from 'mongodb';
+// lib/mongodb.js
+import { MongoClient } from 'mongodb';
 
-// const uri = process.env.MONGODB_URI;
-// const options = {};
+const uri = process.env.MONGODB_URI;
+const options = {};
 
-// let client;
-// let clientPromise;
+let client;
+let clientPromise;
 
-// if (!process.env.MONGODB_URI) {
-//   throw new Error('Please add your Mongo URI to .env.local');
-// }
+if (!process.env.MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable');
+}
 
-// if (process.env.NODE_ENV === 'development') {
-//   // In development, use a global variable so the value is preserved across module reloads
-//   if (!global._mongoClientPromise) {
-//     client = new MongoClient(uri, options);
-//     global._mongoClientPromise = client.connect();
-//   }
-//   clientPromise = global._mongoClientPromise;
-// } else {
-//   // In production, don't use a global variable
-//   client = new MongoClient(uri, options);
-//   clientPromise = client.connect();
-// }
-
-// export default clientPromise;
-import mongoose from 'mongoose';
-
-let isConnected = false;
-
-export const connectToDB = async () => {
-  if (isConnected) return;
-
-  try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: process.env.MONGODB_DB,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    isConnected = true;
-    console.log('✅ MongoDB connected');
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    throw error;
+if (process.env.NODE_ENV === 'development') {
+  // Use a global variable in development to avoid multiple connections
+  if (!global._mongoClientPromise) {
+    client = new MongoClient(uri, options);
+    global._mongoClientPromise = client.connect();
   }
-};
+  clientPromise = global._mongoClientPromise;
+} else {
+  // In production, always create a new client
+  client = new MongoClient(uri, options);
+  clientPromise = client.connect();
+}
 
+export default clientPromise;

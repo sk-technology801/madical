@@ -1,24 +1,7 @@
 // src/lib/auth.js
-import CredentialsProvider from "next-auth/providers/credentials";
+import { getServerSession } from 'next-auth';
+import { authOptions } from './authOptions';
 
-export const authOptions = {
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (
-          credentials.email === "admin@medizone.com" &&
-          credentials.password === "admin123"
-        ) {
-          return { id: "admin", name: "Admin", email: "admin@medizone.com" };
-        }
-        return null;
-      },
-    }),
-  ],
-  secret: process.env.NEXTAUTH_SECRET,
-};
+export async function getAuthSession() {
+  return await getServerSession(authOptions);
+}

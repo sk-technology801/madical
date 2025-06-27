@@ -1,35 +1,37 @@
-export const dynamic = "force-dynamic";
+'use client';
 
-import { signIn } from "next-auth/react";
+import { signIn } from 'next-auth/react';
+import { useState } from 'react';
 
-export default function AdminLoginPage() {
+export default function LoginPage() {
+  const [error, setError] = useState('');
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
+    const res = await signIn('credentials', {
+      email,
+      password,
+      redirect: true,
+      callbackUrl: '/admin',
+    });
+
+    if (res?.error) {
+      setError('Invalid credentials');
+    }
+  };
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black text-white">
-      <form
-        className="bg-gray-900 p-8 rounded-md space-y-4"
-        action="/api/auth/callback/credentials"
-        method="POST"
-      >
-        <h1 className="text-2xl font-bold mb-4">Admin Login</h1>
-        <input
-          type="text"
-          name="email"
-          placeholder="Email"
-          className="w-full px-4 py-2 rounded bg-gray-800 text-white"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="w-full px-4 py-2 rounded bg-gray-800 text-white"
-        />
-        <button
-          type="submit"
-          className="w-full bg-red-600 hover:bg-red-700 py-2 rounded text-white font-semibold"
-        >
-          Login
-        </button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow w-full max-w-sm">
+        <h2 className="text-xl font-bold mb-4">Admin Login</h2>
+        <input type="email" name="email" placeholder="Email" required className="mb-2 w-full p-2 border rounded" />
+        <input type="password" name="password" placeholder="Password" required className="mb-4 w-full p-2 border rounded" />
+        {error && <p className="text-red-500 mb-2">{error}</p>}
+        <button type="submit" className="bg-blue-600 text-white w-full py-2 rounded">Login</button>
       </form>
-    </main>
+    </div>
   );
 }
