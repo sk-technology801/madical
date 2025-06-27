@@ -1,8 +1,8 @@
-// src/lib/authOptions.js
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { connectToDB } from './mongodb';
 
 export const authOptions = {
-  secret: process.env.NEXTAUTH_SECRET, // ✅ REQUIRED
+  secret: process.env.NEXTAUTH_SECRET,
 
   providers: [
     CredentialsProvider({
@@ -11,31 +11,27 @@ export const authOptions = {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
-        console.log('Login attempt:', credentials.email, '-', credentials.password);
+      authorize: async (credentials) => {
+        const db = await connectToDB();
+        const user = await db.collection('users').findOne({ email: credentials.email });
 
-        if (
-          credentials.email === 'admin@example.com' &&
-          credentials.password === 'admin123'
-        ) {
-          return {
-            id: '1',
-            name: 'Admin',
-            email: 'admin@example.com',
-            role: 'admin',
-          };
+        if (!user || user.password !== credentials.password || user.role !== 'admin') {
+          return null;
         }
 
-        return null;
+        return {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
       },
     }),
   ],
 
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-      }
+      if (user) token.role = user.role;
       return token;
     },
     async session({ session, token }) {

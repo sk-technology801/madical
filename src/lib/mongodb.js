@@ -1,4 +1,4 @@
-// lib/mongodb.js
+// src/lib/mongodb.js
 import { MongoClient } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
@@ -8,20 +8,24 @@ let client;
 let clientPromise;
 
 if (!process.env.MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+  throw new Error('❌ Please define MONGODB_URI in .env.local');
 }
 
 if (process.env.NODE_ENV === 'development') {
-  // Use a global variable in development to avoid multiple connections
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
     global._mongoClientPromise = client.connect();
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  // In production, always create a new client
   client = new MongoClient(uri, options);
   clientPromise = client.connect();
 }
 
 export default clientPromise;
+
+// ✅ Add this helper for easy DB access
+export async function connectToDB() {
+  const client = await clientPromise;
+  return client.db(process.env.MONGODB_DB);
+}
